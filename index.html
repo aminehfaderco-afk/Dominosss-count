@@ -1063,7 +1063,9 @@
     // and reflections can trip the *relative* adaptive threshold (locally
     // darker/brighter than their neighborhood) without ever reaching a
     // genuinely dark/light absolute value, so also require an absolute cap.
-    var ABS_THRESHOLD = 100;
+    // Loose enough to still catch a soft-focus pip on a tile that's farther
+    // from the camera (blur dilutes ink darkness toward mid-grey).
+    var ABS_THRESHOLD = 130;
 
     var pass1 = [];
     for (var i=0;i<components.length;i++){
@@ -1089,30 +1091,27 @@
       }
     }
 
-    if (pass1.length === 0) return [];
-
-    var diameters = pass1.map(function(p){ return p.diameter; }).sort(function(a,b){ return a-b; });
-    var median = diameters[Math.floor(diameters.length/2)];
-
-    return pass1.filter(function(p){
-      return p.diameter >= median*0.5 && p.diameter <= median*2;
-    });
+    // Size consistency is checked later, per spatial cluster rather than
+    // globally — a photo shot at an angle can have nearer tiles (bigger
+    // pips) and farther tiles (smaller pips) at once, and a single
+    // photo-wide median would wrongly treat the farther tile as "noise".
+    return pass1;
   }
 
   // Real pips always sit close to their tile-mates — a domino face is a
   // small cluster of dots, and multiple tiles photographed together still
   // group up within the frame. A stray dark/light speck from a patterned
   // background (e.g. a striped tablecloth) lands nowhere near any of that,
-  // isolated on its own. Drop isolated singletons whenever a real cluster
-  // exists elsewhere in the photo; if nothing clusters at all (e.g. a
-  // single lone "1" pip photographed by itself) leave everything as-is,
-  // since there's nothing to compare it against.
+  // isolated on its own. Clustering radius scales with each pair's own
+  // pip size (not one global figure) so perspective — a farther tile with
+  // smaller pips — still clusters correctly at its own local scale.
+  //
+  // Once grouped, size consistency is enforced WITHIN each cluster only:
+  // a near tile's bigger pips and a far tile's smaller pips can coexist in
+  // the same photo as long as each is internally consistent with its own
+  // tile-mates.
   function clusterFilter(points){
     if (points.length <= 2) return points;
-
-    var diameters = points.map(function(p){ return p.diameter; }).sort(function(a,b){ return a-b; });
-    var median = diameters[Math.floor(diameters.length/2)];
-    var radius = Math.max(40, median * 7);
 
     var n = points.length;
     var parent = [];
@@ -1124,17 +1123,37 @@
       for (var j=i+1;j<n;j++){
         var dx = points[i].cx - points[j].cx;
         var dy = points[i].cy - points[j].cy;
+        var radius = Math.max(40, Math.max(points[i].diameter, points[j].diameter) * 7);
         if (Math.sqrt(dx*dx + dy*dy) <= radius) union(i, j);
       }
     }
 
-    var sizes = {};
-    for (var k=0;k<n;k++){ var r = find(k); sizes[r] = (sizes[r] || 0) + 1; }
+    var groups = {};
+    for (var k=0;k<n;k++){
+      var r = find(k);
+      if (!groups[r]) groups[r] = [];
+      groups[r].push(k);
+    }
+
     var maxSize = 0;
-    for (var key in sizes){ if (sizes[key] > maxSize) maxSize = sizes[key]; }
+    for (var key in groups){ if (groups[key].length > maxSize) maxSize = groups[key].length; }
     if (maxSize <= 1) return points;
 
-    return points.filter(function(p, idx){ return sizes[find(idx)] > 1; });
+    var survivingIdx = [];
+    for (var gkey in groups){
+      var idxs = groups[gkey];
+      if (idxs.length <= 1) continue; // isolated singleton, likely noise — drop
+
+      var groupDiameters = idxs.map(function(i){ return points[i].diameter; }).sort(function(a,b){ return a-b; });
+      var localMedian = groupDiameters[Math.floor(groupDiameters.length/2)];
+
+      for (var m=0;m<idxs.length;m++){
+        var d = points[idxs[m]].diameter;
+        if (d >= localMedian*0.4 && d <= localMedian*2.5) survivingIdx.push(idxs[m]);
+      }
+    }
+
+    return survivingIdx.map(function(i){ return points[i]; });
   }
 
   function detectPips(imageData){
