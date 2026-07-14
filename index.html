@@ -551,7 +551,7 @@
       </div>
       <p class="zoom-hint">🔍 Pincez, faites glisser ou double-tapez la photo pour zoomer</p>
       <span class="field-label" id="photoTeamLabel">Score pour l'équipe</span>
-      <input type="number" inputmode="numeric" class="count-input" id="detectedCount" value="0">
+      <input type="text" pattern="[0-9]*" inputmode="numeric" enterkeyhint="done" class="count-input" id="detectedCount" value="0">
     </div>
     <div class="modal-actions">
       <button class="btn" id="btnRetake">🔄 Reprendre</button>
@@ -680,7 +680,8 @@
 
     var tdUs = document.createElement('td');
     var inputUs = document.createElement('input');
-    inputUs.type = 'number';
+    inputUs.type = 'text';
+    inputUs.setAttribute('pattern', '[0-9]*');
     inputUs.inputMode = 'numeric';
     inputUs.enterKeyHint = 'done';
     inputUs.className = 'score-input';
@@ -691,7 +692,8 @@
 
     var tdThem = document.createElement('td');
     var inputThem = document.createElement('input');
-    inputThem.type = 'number';
+    inputThem.type = 'text';
+    inputThem.setAttribute('pattern', '[0-9]*');
     inputThem.inputMode = 'numeric';
     inputThem.enterKeyHint = 'done';
     inputThem.className = 'score-input';
@@ -736,8 +738,9 @@
     var input = e.target;
     var team = input.getAttribute('data-team');
     var row = parseInt(input.getAttribute('data-row'), 10);
-    var val = input.value;
-    state.rows[row][team] = numOrNull(val);
+    var digitsOnly = input.value.replace(/[^0-9]/g, '');
+    if (digitsOnly !== input.value) input.value = digitsOnly;
+    state.rows[row][team] = numOrNull(digitsOnly);
     afterScoreChange();
   }
 
@@ -1047,6 +1050,12 @@
   var photoTeamLabel = document.getElementById('photoTeamLabel');
   var currentPhotoTeam = null;
   var MAX_DIM = 900;
+
+  detectedCountInput.addEventListener('input', function(){
+    var digitsOnly = detectedCountInput.value.replace(/[^0-9]/g, '');
+    if (digitsOnly !== detectedCountInput.value) detectedCountInput.value = digitsOnly;
+  });
+  detectedCountInput.addEventListener('keydown', onCellKeydown);
 
   document.getElementById('headerUs').addEventListener('click', function(){
     currentPhotoTeam = 'us';
