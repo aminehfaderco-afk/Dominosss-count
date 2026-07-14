@@ -319,17 +319,19 @@
   .photo-preview-wrap{
     position: relative;
     width:100%;
+    height: 46vh;
     border-radius: var(--radius-md);
     overflow:hidden;
     border: 1px solid rgba(201,162,39,0.3);
     background:#000;
     margin-bottom: 6px;
-    touch-action: none;
+    touch-action: pan-y;
   }
   .photo-preview-wrap canvas{
     display:block;
     width:100%;
-    height:auto;
+    height:100%;
+    object-fit: contain;
     transform-origin: center center;
     will-change: transform;
   }
@@ -1130,6 +1132,10 @@
     photoCanvas.style.transition = animated ? 'transform .18s ease' : 'none';
     photoCanvas.style.transform = 'translate(' + panX + 'px,' + panY + 'px) scale(' + zoomScale + ')';
     btnResetZoom.style.display = zoomScale > 1.02 ? 'block' : 'none';
+    // Only capture touch gestures for our own pan/pinch once zoomed in;
+    // at rest, let normal vertical swipes scroll the modal so the count
+    // field and buttons stay reachable below a tall portrait photo.
+    photoPreviewWrap.style.touchAction = zoomScale > 1.02 ? 'none' : 'pan-y';
   }
 
   function clampPan(){
