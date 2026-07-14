@@ -141,16 +141,27 @@
     cursor: pointer;
     user-select: none;
   }
-  #scoreTable thead th.clickable:active{ opacity: .75; }
+  #scoreTable thead th.clickable:active .photo-hint{
+    transform: scale(0.95);
+    background: rgba(232,199,102,0.28);
+  }
 
   .photo-hint{
-    display:block;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     font-family: var(--font-body);
-    font-weight: 500;
+    font-weight: 600;
     font-size: 11px;
     color: var(--gold-light);
-    letter-spacing: .02em;
-    margin-top: 2px;
+    letter-spacing: .01em;
+    margin-top: 6px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: rgba(201,162,39,0.16);
+    border: 1px solid rgba(232,199,102,0.55);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.35);
+    transition: transform .1s ease, background .1s ease;
   }
 
   #scoreTable tbody td{
@@ -530,8 +541,8 @@
     <table id="scoreTable">
       <thead>
         <tr>
-          <th id="headerUs" class="clickable" data-team="us">Nous<span class="photo-hint">📷 Photo</span></th>
-          <th id="headerThem" class="clickable" data-team="them">Vous<span class="photo-hint">📷 Photo</span></th>
+          <th id="headerUs" class="clickable" data-team="us">Nous<span class="photo-hint">📷 Compter avec IA</span></th>
+          <th id="headerThem" class="clickable" data-team="them">Vous<span class="photo-hint">📷 Compter avec IA</span></th>
         </tr>
       </thead>
       <tbody id="scoreBody"></tbody>
