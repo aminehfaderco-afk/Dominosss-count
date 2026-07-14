@@ -755,9 +755,9 @@
     }
   }
 
-  function findTargetRowIndex(){
+  function findTargetRowIndex(team){
     for (var i=0;i<state.rows.length;i++){
-      if (state.rows[i].us === null && state.rows[i].them === null) return i;
+      if (state.rows[i][team] === null) return i;
     }
     appendRow();
     return state.rows.length - 1;
@@ -1113,7 +1113,7 @@
   document.getElementById('btnConfirmPhoto').addEventListener('click', function(){
     var value = numOrNull(detectedCountInput.value);
     if (value === null) value = 0;
-    var targetRow = findTargetRowIndex();
+    var targetRow = findTargetRowIndex(currentPhotoTeam);
     setRowValue(targetRow, currentPhotoTeam, value);
     closeModal(photoModalOverlay);
   });
