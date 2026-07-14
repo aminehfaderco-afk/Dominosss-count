@@ -979,7 +979,10 @@
     return integral;
   }
 
-  function adaptiveThreshold(gray, w, h){
+  // polarity 'dark' finds pips darker than their surroundings (classic
+  // cream tile with black pips); 'light' finds pips brighter than their
+  // surroundings (black/dark tile with white pips, e.g. black domino sets).
+  function adaptiveThreshold(gray, w, h, polarity){
     var windowSize = Math.max(9, Math.round(Math.min(w,h) * 0.13));
     var half = Math.floor(windowSize/2);
     var integral = buildIntegralImage(gray, w, h);
@@ -994,7 +997,10 @@
         var sum = integral[(y1+1)*stride + (x1+1)] - integral[y0*stride + (x1+1)]
                 - integral[(y1+1)*stride + x0] + integral[y0*stride + x0];
         var mean = sum / count;
-        binary[y*w + x] = (gray[y*w + x] < mean * (1 - 0.12)) ? 1 : 0;
+        var v = gray[y*w + x];
+        binary[y*w + x] = polarity === 'light'
+          ? (v > mean * (1 + 0.12) ? 1 : 0)
+          : (v < mean * (1 - 0.12) ? 1 : 0);
       }
     }
     return binary;
@@ -1047,16 +1053,17 @@
     return components;
   }
 
-  function detectPips(imageData){
-    var w = imageData.width, h = imageData.height;
-    var gray = toGrayscale(imageData);
-    var binary = adaptiveThreshold(gray, w, h);
+  // Runs the full candidate pipeline for one polarity: 'dark' pips on a
+  // light tile (classic cream domino), or 'light' pips on a dark tile
+  // (e.g. black domino sets with white pips).
+  function runDetectionPass(gray, w, h, minDim, polarity){
+    var binary = adaptiveThreshold(gray, w, h, polarity);
     var components = findConnectedComponents(binary, w, h, gray);
-    var minDim = Math.min(w, h);
-    // Pips are printed near-black; skin creases/shadows/knuckles can trip the
-    // *relative* adaptive threshold (locally darker than their neighborhood)
-    // without ever being genuinely dark, so also require an absolute cap.
-    var ABS_DARK_THRESHOLD = 100;
+    // Pips are printed in a strongly saturated ink; skin creases, shadows
+    // and reflections can trip the *relative* adaptive threshold (locally
+    // darker/brighter than their neighborhood) without ever reaching a
+    // genuinely dark/light absolute value, so also require an absolute cap.
+    var ABS_THRESHOLD = 100;
 
     var pass1 = [];
     for (var i=0;i<components.length;i++){
@@ -1066,11 +1073,14 @@
       var ratio = bw / bh;
       var fill = c.area / (bw*bh);
       var diameter = Math.max(bw, bh);
+      var intensityOk = polarity === 'light'
+        ? c.meanGray > (255 - ABS_THRESHOLD)
+        : c.meanGray < ABS_THRESHOLD;
 
       if (ratio >= 0.6 && ratio <= 1.6 &&
           fill >= 0.55 && fill <= 0.95 &&
           diameter > 3 && diameter < minDim * 0.35 &&
-          c.meanGray < ABS_DARK_THRESHOLD){
+          intensityOk){
         pass1.push({
           cx: (c.minX + c.maxX) / 2,
           cy: (c.minY + c.maxY) / 2,
@@ -1084,11 +1094,25 @@
     var diameters = pass1.map(function(p){ return p.diameter; }).sort(function(a,b){ return a-b; });
     var median = diameters[Math.floor(diameters.length/2)];
 
-    var pass2 = pass1.filter(function(p){
+    return pass1.filter(function(p){
       return p.diameter >= median*0.5 && p.diameter <= median*2;
     });
+  }
 
-    return pass2;
+  function detectPips(imageData){
+    var w = imageData.width, h = imageData.height;
+    var gray = toGrayscale(imageData);
+    var minDim = Math.min(w, h);
+
+    // The photo could be a classic cream tile with black pips, or a
+    // black/dark tile with white pips (common on "luxury" domino sets) —
+    // try both and keep whichever finds more consistent candidates, since
+    // running the wrong polarity on a real domino photo turns up little
+    // to nothing.
+    var darkPass = runDetectionPass(gray, w, h, minDim, 'dark');
+    var lightPass = runDetectionPass(gray, w, h, minDim, 'light');
+
+    return lightPass.length > darkPass.length ? lightPass : darkPass;
   }
 
   /* ---------------------------------------------------------------------
