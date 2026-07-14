@@ -1151,7 +1151,17 @@
     var lightPass = runDetectionPass(gray, w, h, minDim, 'light');
 
     var chosen = lightPass.length > darkPass.length ? lightPass : darkPass;
-    return clusterFilter(chosen);
+    var clustered = clusterFilter(chosen);
+
+    // A busy/speckled surface (e.g. natural stone flooring) can produce
+    // dozens of small round dark specks that pass every shape/size/isolation
+    // check simultaneously — no realistic single domino capture needs this
+    // many pips at once, so past this point we no longer trust the count
+    // and leave it to manual entry instead of showing a wildly wrong number.
+    var PLAUSIBLE_MAX_PIPS = 60;
+    if (clustered.length > PLAUSIBLE_MAX_PIPS) return [];
+
+    return clustered;
   }
 
   /* ---------------------------------------------------------------------
