@@ -1047,6 +1047,45 @@
     return components;
   }
 
+  // A real pip sits on a smooth, light tile surface. Sample a ring around
+  // the candidate (outside the dark blob itself) and report how bright and
+  // how uniform that surrounding surface is — busy/textured backgrounds
+  // (stone veining, cluttered objects) score dark and/or noisy here even
+  // when they happen to contain a small dark roundish speck.
+  function sampleRingStats(gray, binary, data, w, h, cx, cy, innerR, outerR){
+    var count = 0, sum = 0, sumSq = 0;
+    var sumR = 0, sumG = 0, sumB = 0;
+    var samples = 24;
+    for (var a=0; a<samples; a++){
+      var theta = (a / samples) * Math.PI * 2;
+      var radii = [innerR, outerR];
+      for (var r=0; r<radii.length; r++){
+        var x = Math.round(cx + radii[r] * Math.cos(theta));
+        var y = Math.round(cy + radii[r] * Math.sin(theta));
+        if (x < 0 || x >= w || y < 0 || y >= h) continue;
+        var idx = y*w + x;
+        // Skip pixels that belong to some other dark blob (e.g. a
+        // neighbouring pip on the same domino half) — we only want to
+        // characterize the plain tile surface, not other ink marks.
+        if (binary[idx] === 1) continue;
+        var v = gray[idx];
+        sum += v;
+        sumSq += v*v;
+        var p = idx * 4;
+        sumR += data[p];
+        sumG += data[p+1];
+        sumB += data[p+2];
+        count++;
+      }
+    }
+    if (count < 8) return null;
+    var mean = sum / count;
+    var variance = Math.max(0, sumSq/count - mean*mean);
+    var meanR = sumR/count, meanG = sumG/count, meanB = sumB/count;
+    var saturation = Math.max(meanR, meanG, meanB) - Math.min(meanR, meanG, meanB);
+    return { mean: mean, std: Math.sqrt(variance), saturation: saturation };
+  }
+
   function detectPips(imageData){
     var w = imageData.width, h = imageData.height;
     var gray = toGrayscale(imageData);
@@ -1057,6 +1096,9 @@
     // *relative* adaptive threshold (locally darker than their neighborhood)
     // without ever being genuinely dark, so also require an absolute cap.
     var ABS_DARK_THRESHOLD = 100;
+    var LIGHT_BG_MIN = 150;
+    var BG_UNIFORMITY_MAX = 22;
+    var BG_SATURATION_MAX = 30;
 
     var pass1 = [];
     for (var i=0;i<components.length;i++){
@@ -1071,11 +1113,11 @@
           fill >= 0.55 && fill <= 0.95 &&
           diameter > 3 && diameter < minDim * 0.35 &&
           c.meanGray < ABS_DARK_THRESHOLD){
-        pass1.push({
-          cx: (c.minX + c.maxX) / 2,
-          cy: (c.minY + c.maxY) / 2,
-          diameter: diameter
-        });
+        var cx = (c.minX + c.maxX) / 2;
+        var cy = (c.minY + c.maxY) / 2;
+        var ring = sampleRingStats(gray, binary, imageData.data, w, h, cx, cy, diameter/2 + 2, diameter/2 + 2 + Math.max(6, diameter*0.8));
+        if (ring && (ring.mean < LIGHT_BG_MIN || ring.std > BG_UNIFORMITY_MAX || ring.saturation > BG_SATURATION_MAX)) continue;
+        pass1.push({ cx: cx, cy: cy, diameter: diameter });
       }
     }
 
