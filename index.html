@@ -237,7 +237,21 @@
     border-color: rgba(193,68,60,0.5);
     color: var(--danger-light);
   }
+  .btn-danger-solid{
+    background: linear-gradient(180deg, var(--danger-light), var(--danger));
+    color: #2a0a08;
+    border-color: var(--danger);
+    font-weight: 700;
+  }
   .btn-block{ flex: 1 1 100%; }
+
+  .confirm-text{
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.5;
+    text-align:center;
+    margin: 4px 0 14px;
+  }
 
   /* install banner */
   #installBanner{
@@ -605,6 +619,20 @@
     </div>
     <div class="modal-actions">
       <button class="btn btn-gold" id="btnCloseWin" style="flex:1;">Voir le tableau final</button>
+    </div>
+  </div>
+</div>
+
+<!-- Reset confirmation modal -->
+<div class="modal-overlay" id="confirmResetModalOverlay">
+  <div class="modal">
+    <div class="modal-title">Réinitialiser</div>
+    <div class="modal-body">
+      <p class="confirm-text">Êtes-vous sûr de vouloir réinitialiser ?</p>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="btnCancelReset">Annuler</button>
+      <button class="btn btn-danger-solid" id="btnConfirmReset">Oui</button>
     </div>
   </div>
 </div>
@@ -1387,8 +1415,18 @@
    * Reset
    * ------------------------------------------------------------------- */
 
+  var confirmResetModalOverlay = document.getElementById('confirmResetModalOverlay');
+
   document.getElementById('btnReset').addEventListener('click', function(){
-    if (!confirm('Réinitialiser la partie en cours ? Cette action est irréversible.')) return;
+    openModal(confirmResetModalOverlay);
+  });
+
+  document.getElementById('btnCancelReset').addEventListener('click', function(){
+    closeModal(confirmResetModalOverlay);
+  });
+
+  document.getElementById('btnConfirmReset').addEventListener('click', function(){
+    closeModal(confirmResetModalOverlay);
     resetGame();
   });
 
