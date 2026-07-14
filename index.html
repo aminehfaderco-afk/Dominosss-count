@@ -317,17 +317,43 @@
   }
 
   .photo-preview-wrap{
+    position: relative;
     width:100%;
     border-radius: var(--radius-md);
     overflow:hidden;
     border: 1px solid rgba(201,162,39,0.3);
     background:#000;
-    margin-bottom: 12px;
+    margin-bottom: 6px;
+    touch-action: none;
   }
   .photo-preview-wrap canvas{
     display:block;
     width:100%;
     height:auto;
+    transform-origin: center center;
+    will-change: transform;
+  }
+  .zoom-reset-btn{
+    position:absolute;
+    top:8px;
+    right:8px;
+    z-index: 2;
+    background: rgba(10,31,25,0.75);
+    color: var(--gold-light);
+    border: 1px solid rgba(201,162,39,0.5);
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 12px;
+    padding: 5px 10px;
+    display:none;
+    cursor:pointer;
+  }
+  .zoom-hint{
+    text-align:center;
+    color: var(--text-muted);
+    font-size: 11px;
+    margin: 0 0 10px;
   }
 
   .field-label{
@@ -514,9 +540,11 @@
   <div class="modal">
     <div class="modal-title">Points détectés</div>
     <div class="modal-body">
-      <div class="photo-preview-wrap">
+      <div class="photo-preview-wrap" id="photoPreviewWrap">
         <canvas id="photoCanvas"></canvas>
+        <button type="button" class="zoom-reset-btn" id="btnResetZoom">1:1</button>
       </div>
+      <p class="zoom-hint">🔍 Pincez, faites glisser ou double-tapez la photo pour zoomer</p>
       <span class="field-label" id="photoTeamLabel">Score pour l'équipe</span>
       <input type="number" inputmode="numeric" class="count-input" id="detectedCount" value="0">
     </div>
@@ -649,6 +677,7 @@
     var inputUs = document.createElement('input');
     inputUs.type = 'number';
     inputUs.inputMode = 'numeric';
+    inputUs.enterKeyHint = 'done';
     inputUs.className = 'score-input';
     inputUs.setAttribute('data-team', 'us');
     inputUs.setAttribute('data-row', String(index));
@@ -659,6 +688,7 @@
     var inputThem = document.createElement('input');
     inputThem.type = 'number';
     inputThem.inputMode = 'numeric';
+    inputThem.enterKeyHint = 'done';
     inputThem.className = 'score-input';
     inputThem.setAttribute('data-team', 'them');
     inputThem.setAttribute('data-row', String(index));
@@ -670,8 +700,17 @@
 
     inputUs.addEventListener('input', onCellInput);
     inputThem.addEventListener('input', onCellInput);
+    inputUs.addEventListener('keydown', onCellKeydown);
+    inputThem.addEventListener('keydown', onCellKeydown);
 
     return tr;
+  }
+
+  function onCellKeydown(e){
+    if (e.key === 'Enter'){
+      e.preventDefault();
+      e.target.blur();
+    }
   }
 
   function renderAllRows(){
@@ -1048,6 +1087,7 @@
 
         detectedCountInput.value = String(pips.length);
         photoTeamLabel.textContent = 'Score pour l\'équipe ' + (currentPhotoTeam === 'us' ? 'Nous' : 'Vous');
+        resetZoom(false);
         openModal(photoModalOverlay);
       };
       img.src = e.target.result;
@@ -1072,6 +1112,112 @@
     setRowValue(targetRow, currentPhotoTeam, value);
     closeModal(photoModalOverlay);
   });
+
+  /* ---------------------------------------------------------------------
+   * Photo preview zoom (pinch, drag-to-pan, double-tap)
+   * ------------------------------------------------------------------- */
+
+  var photoPreviewWrap = document.getElementById('photoPreviewWrap');
+  var btnResetZoom = document.getElementById('btnResetZoom');
+  var zoomScale = 1, panX = 0, panY = 0;
+  var activePointers = {};
+  var pinchStartDist = 0, pinchStartScale = 1;
+  var dragStart = null;
+  var lastTapTime = 0;
+  var MAX_ZOOM = 4;
+
+  function applyZoomTransform(animated){
+    photoCanvas.style.transition = animated ? 'transform .18s ease' : 'none';
+    photoCanvas.style.transform = 'translate(' + panX + 'px,' + panY + 'px) scale(' + zoomScale + ')';
+    btnResetZoom.style.display = zoomScale > 1.02 ? 'block' : 'none';
+  }
+
+  function clampPan(){
+    var wrapRect = photoPreviewWrap.getBoundingClientRect();
+    var maxX = (wrapRect.width * (zoomScale - 1)) / 2;
+    var maxY = (wrapRect.height * (zoomScale - 1)) / 2;
+    panX = Math.max(-maxX, Math.min(maxX, panX));
+    panY = Math.max(-maxY, Math.min(maxY, panY));
+  }
+
+  function resetZoom(animated){
+    zoomScale = 1; panX = 0; panY = 0;
+    applyZoomTransform(animated !== false);
+  }
+
+  function pointerDistance(p1, p2){
+    var dx = p1.x - p2.x, dy = p1.y - p2.y;
+    return Math.sqrt(dx*dx + dy*dy);
+  }
+
+  photoPreviewWrap.addEventListener('pointerdown', function(e){
+    if (e.target === btnResetZoom) return;
+    photoPreviewWrap.setPointerCapture(e.pointerId);
+    activePointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+
+    var ids = Object.keys(activePointers);
+    if (ids.length === 2){
+      var p1 = activePointers[ids[0]], p2 = activePointers[ids[1]];
+      pinchStartDist = pointerDistance(p1, p2);
+      pinchStartScale = zoomScale;
+      dragStart = null;
+    } else if (ids.length === 1){
+      var now = Date.now();
+      if (now - lastTapTime < 300){
+        if (zoomScale > 1.02){
+          resetZoom(true);
+        } else {
+          zoomScale = 2.5;
+          panX = 0; panY = 0;
+          applyZoomTransform(true);
+        }
+        lastTapTime = 0;
+        dragStart = null;
+        return;
+      }
+      lastTapTime = now;
+      dragStart = { x: e.clientX, y: e.clientY, panX: panX, panY: panY };
+    }
+  });
+
+  photoPreviewWrap.addEventListener('pointermove', function(e){
+    if (!(e.pointerId in activePointers)) return;
+    activePointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+
+    var ids = Object.keys(activePointers);
+    if (ids.length === 2){
+      var p1 = activePointers[ids[0]], p2 = activePointers[ids[1]];
+      var dist = pointerDistance(p1, p2);
+      if (pinchStartDist > 0){
+        zoomScale = Math.max(1, Math.min(MAX_ZOOM, pinchStartScale * (dist / pinchStartDist)));
+        clampPan();
+        applyZoomTransform(false);
+      }
+    } else if (ids.length === 1 && dragStart && zoomScale > 1.02){
+      panX = dragStart.panX + (e.clientX - dragStart.x);
+      panY = dragStart.panY + (e.clientY - dragStart.y);
+      clampPan();
+      applyZoomTransform(false);
+    }
+  });
+
+  function endPointer(e){
+    delete activePointers[e.pointerId];
+    var ids = Object.keys(activePointers);
+    if (ids.length === 1){
+      var p = activePointers[ids[0]];
+      dragStart = { x: p.x, y: p.y, panX: panX, panY: panY };
+    } else {
+      dragStart = null;
+      pinchStartDist = 0;
+    }
+    if (zoomScale < 1.02) resetZoom(true);
+  }
+
+  photoPreviewWrap.addEventListener('pointerup', endPointer);
+  photoPreviewWrap.addEventListener('pointercancel', endPointer);
+
+  btnResetZoom.addEventListener('click', function(){ resetZoom(true); });
 
   /* ---------------------------------------------------------------------
    * Modal helpers
