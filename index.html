@@ -351,7 +351,7 @@
     position: relative;
     width: fit-content;
     max-width: 100%;
-    max-height: 32dvh;
+    max-height: 38dvh;
     margin: 0 auto 6px;
     border-radius: var(--radius-md);
     overflow:hidden;
@@ -362,7 +362,7 @@
   .photo-preview-wrap canvas{
     display:block;
     max-width:100%;
-    max-height: 32dvh;
+    max-height: 38dvh;
     width:auto;
     height:auto;
     object-fit: contain;
@@ -1099,6 +1099,44 @@
     });
   }
 
+  // Real pips always sit close to their tile-mates — a domino face is a
+  // small cluster of dots, and multiple tiles photographed together still
+  // group up within the frame. A stray dark/light speck from a patterned
+  // background (e.g. a striped tablecloth) lands nowhere near any of that,
+  // isolated on its own. Drop isolated singletons whenever a real cluster
+  // exists elsewhere in the photo; if nothing clusters at all (e.g. a
+  // single lone "1" pip photographed by itself) leave everything as-is,
+  // since there's nothing to compare it against.
+  function clusterFilter(points){
+    if (points.length <= 2) return points;
+
+    var diameters = points.map(function(p){ return p.diameter; }).sort(function(a,b){ return a-b; });
+    var median = diameters[Math.floor(diameters.length/2)];
+    var radius = Math.max(40, median * 7);
+
+    var n = points.length;
+    var parent = [];
+    for (var i=0;i<n;i++) parent.push(i);
+    function find(x){ while(parent[x] !== x){ parent[x] = parent[parent[x]]; x = parent[x]; } return x; }
+    function union(a,b){ var ra=find(a), rb=find(b); if (ra!==rb) parent[ra]=rb; }
+
+    for (var i=0;i<n;i++){
+      for (var j=i+1;j<n;j++){
+        var dx = points[i].cx - points[j].cx;
+        var dy = points[i].cy - points[j].cy;
+        if (Math.sqrt(dx*dx + dy*dy) <= radius) union(i, j);
+      }
+    }
+
+    var sizes = {};
+    for (var k=0;k<n;k++){ var r = find(k); sizes[r] = (sizes[r] || 0) + 1; }
+    var maxSize = 0;
+    for (var key in sizes){ if (sizes[key] > maxSize) maxSize = sizes[key]; }
+    if (maxSize <= 1) return points;
+
+    return points.filter(function(p, idx){ return sizes[find(idx)] > 1; });
+  }
+
   function detectPips(imageData){
     var w = imageData.width, h = imageData.height;
     var gray = toGrayscale(imageData);
@@ -1112,7 +1150,8 @@
     var darkPass = runDetectionPass(gray, w, h, minDim, 'dark');
     var lightPass = runDetectionPass(gray, w, h, minDim, 'light');
 
-    return lightPass.length > darkPass.length ? lightPass : darkPass;
+    var chosen = lightPass.length > darkPass.length ? lightPass : darkPass;
+    return clusterFilter(chosen);
   }
 
   /* ---------------------------------------------------------------------
@@ -1166,10 +1205,20 @@
         var imageData = ctx.getImageData(0, 0, w, h);
         var pips = detectPips(imageData);
 
-        ctx.lineWidth = Math.max(1.5, w*0.004);
-        ctx.strokeStyle = '#E23A2E';
+        var haloWidth = Math.max(3, w*0.009);
+        var ringWidth = Math.max(2, w*0.006);
         for (var i=0;i<pips.length;i++){
           var p = pips[i];
+          // Dark halo behind the red ring so it stays visible against both
+          // light and dark tiles, then a bright, saturated red on top.
+          ctx.lineWidth = haloWidth;
+          ctx.strokeStyle = 'rgba(0,0,0,0.55)';
+          ctx.beginPath();
+          ctx.arc(p.cx, p.cy, p.diameter/2 + 2, 0, Math.PI*2);
+          ctx.stroke();
+
+          ctx.lineWidth = ringWidth;
+          ctx.strokeStyle = '#FF2418';
           ctx.beginPath();
           ctx.arc(p.cx, p.cy, p.diameter/2 + 2, 0, Math.PI*2);
           ctx.stroke();
