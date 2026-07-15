@@ -218,6 +218,73 @@
     margin-bottom: 2px;
   }
 
+  .progress-section{
+    width:100%;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(201,162,39,0.2);
+  }
+  .progress-row{
+    display:flex;
+    gap: 10px;
+  }
+  .progress-track{
+    flex:1;
+    height: 9px;
+    border-radius: 999px;
+    background: rgba(0,0,0,0.35);
+    overflow:hidden;
+    border: 1px solid rgba(201,162,39,0.25);
+  }
+  .progress-fill{
+    height:100%;
+    width:0%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    transition: width .35s ease;
+  }
+  .lead-text{
+    text-align:center;
+    margin: 9px 0 0;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--gold-light);
+    min-height: 15px;
+  }
+
+  .just-filled{
+    animation: smokey-cell-flash 1.1s ease;
+  }
+  @keyframes smokey-cell-flash{
+    0%{ box-shadow: 0 0 0 3px rgba(232,199,102,0.9); background: rgba(232,199,102,0.28); }
+    100%{ box-shadow: 0 0 0 0 rgba(232,199,102,0); background: rgba(0,0,0,0.22); }
+  }
+
+  .toast{
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%) translateY(12px);
+    background: linear-gradient(180deg, var(--felt-light), var(--felt-2));
+    border: 1px solid rgba(201,162,39,0.45);
+    border-radius: var(--radius-md);
+    padding: 12px 20px;
+    color: var(--cream);
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    z-index: 80;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease, transform .25s ease;
+    max-width: 88vw;
+    text-align:center;
+  }
+  .toast.show{
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
   .actions{
     width:100%;
     display:flex;
@@ -615,6 +682,14 @@
         </tr>
       </tfoot>
     </table>
+
+    <div class="progress-section">
+      <div class="progress-row">
+        <div class="progress-track"><div class="progress-fill" id="progressUs"></div></div>
+        <div class="progress-track"><div class="progress-fill" id="progressThem"></div></div>
+      </div>
+      <p class="lead-text" id="leadText"></p>
+    </div>
   </div>
 
   <div class="actions">
@@ -748,6 +823,8 @@
   </div>
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script>
 (function(){
   'use strict';
@@ -766,6 +843,21 @@
   var scoreBody = document.getElementById('scoreBody');
   var totalUsEl = document.getElementById('totalUs');
   var totalThemEl = document.getElementById('totalThem');
+  var progressUsEl = document.getElementById('progressUs');
+  var progressThemEl = document.getElementById('progressThem');
+  var leadTextEl = document.getElementById('leadText');
+
+  function vibrate(pattern){
+    if (navigator.vibrate){ try{ navigator.vibrate(pattern); }catch(e){} }
+  }
+
+  function showToast(message){
+    var toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(function(){ toast.classList.remove('show'); }, 2200);
+  }
 
   function makeEmptyRow(){ return { us: null, them: null }; }
 
@@ -913,6 +1005,20 @@
     }
     totalUsEl.textContent = String(sumUs);
     totalThemEl.textContent = String(sumThem);
+
+    progressUsEl.style.width = Math.min(100, (sumUs / TARGET) * 100) + '%';
+    progressThemEl.style.width = Math.min(100, (sumThem / TARGET) * 100) + '%';
+
+    if (sumUs === 0 && sumThem === 0){
+      leadTextEl.textContent = '';
+    } else if (sumUs === sumThem){
+      leadTextEl.textContent = 'Égalité';
+    } else {
+      var diff = Math.abs(sumUs - sumThem);
+      var leader = sumUs > sumThem ? 'Nous menons' : 'Vous menez';
+      leadTextEl.textContent = leader + ' de ' + diff + ' point' + (diff > 1 ? 's' : '');
+    }
+
     return { us: sumUs, them: sumThem };
   }
 
@@ -945,7 +1051,15 @@
   function setRowValue(rowIndex, team, value){
     state.rows[rowIndex][team] = value;
     var input = scoreBody.querySelector('input[data-team="' + team + '"][data-row="' + rowIndex + '"]');
-    if (input) input.value = value;
+    if (input){
+      input.value = value;
+      input.classList.remove('just-filled');
+      // Force a reflow so re-adding the class restarts the flash animation
+      // even if the same cell was just filled again a moment ago.
+      void input.offsetWidth;
+      input.classList.add('just-filled');
+      input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
     afterScoreChange();
   }
 
@@ -1395,6 +1509,7 @@
     if (value === null) value = 0;
     var targetRow = findTargetRowIndex(currentPhotoTeam);
     setRowValue(targetRow, currentPhotoTeam, value);
+    vibrate(15);
     closeModal(photoModalOverlay);
   });
 
@@ -1578,6 +1693,8 @@
     saveHistory(history);
 
     closeModal(saveModalOverlay);
+    vibrate(15);
+    showToast('Partie enregistrée ✓');
   });
 
   /* ---------------------------------------------------------------------
@@ -1742,6 +1859,7 @@
 
   function showWinModal(winner){
     winTeamLabel.textContent = winner;
+    vibrate([40, 60, 40, 60, 90]);
     openModal(winModalOverlay);
   }
 

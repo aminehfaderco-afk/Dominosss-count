@@ -1,6 +1,6 @@
 // IMPORTANT: bump this version string on every deploy, otherwise installed
 // clients keep serving the old cached files forever (cache-first strategy).
-const CACHE_NAME = 'smokey-dominos-v18';
+const CACHE_NAME = 'smokey-dominos-v19';
 
 const PRECACHE_URLS = [
   './',
