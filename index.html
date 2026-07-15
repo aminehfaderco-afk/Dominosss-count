@@ -49,10 +49,63 @@
     width: 1em;
     height: 1em;
     vertical-align: -0.15em;
-    margin-right: .35em;
+    margin-inline-end: .35em;
     flex-shrink: 0;
   }
-  .hi-del .icon{ margin-right: 0; }
+  .hi-del .icon{ margin-inline-end: 0; }
+
+  .corner-controls{
+    position: fixed;
+    top: max(14px, env(safe-area-inset-top));
+    z-index: 5;
+    display: flex;
+    gap: 8px;
+  }
+  .corner-controls.corner-start{ inset-inline-start: 14px; }
+  .corner-controls.corner-end{ inset-inline-end: 14px; }
+  .corner-btn{
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1px solid rgba(201,162,39,0.5);
+    background: rgba(10,31,25,0.65);
+    color: var(--gold-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+  }
+  .corner-btn:active{ background: rgba(10,31,25,0.9); }
+  .corner-btn .icon{ margin-inline-end: 0; width: 18px; height: 18px; }
+  .corner-btn.lang-btn{ font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: .02em; }
+
+  .lang-option{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(201,162,39,0.3);
+    background: rgba(255,255,255,0.03);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 16px;
+    text-align: start;
+    cursor: pointer;
+  }
+  .lang-option:last-child{ margin-bottom: 0; }
+  .lang-option.active{
+    border-color: var(--gold);
+    background: rgba(201,162,39,0.14);
+    color: var(--gold-light);
+    font-weight: 600;
+  }
+  .lang-option .lang-check{ width: 18px; height: 18px; visibility: hidden; }
+  .lang-option.active .lang-check{ visibility: visible; }
 
   html,body{
     margin:0; padding:0; min-height:100%;
@@ -149,7 +202,7 @@
   #scoreTable thead th:first-child,
   #scoreTable tbody td:first-child,
   #scoreTable tfoot td:first-child{
-    border-right: 2px solid var(--gold);
+    border-inline-end: 2px solid var(--gold);
   }
 
   #scoreTable thead th.clickable{
@@ -477,7 +530,7 @@
   .zoom-reset-btn{
     position:absolute;
     top:8px;
-    right:8px;
+    inset-inline-end:8px;
     z-index: 2;
     background: rgba(10,31,25,0.75);
     color: var(--gold-light);
@@ -592,7 +645,7 @@
   }
   .hi-winner-us{ color: var(--team-us-light); }
   .hi-winner-them{ color: var(--team-them-light); }
-  .hi-trophy{ margin-right: .25em; width: .85em; height: .85em; }
+  .hi-trophy{ margin-inline-end: .25em; width: .85em; height: .85em; }
   .history-item .hi-score{
     font-family: var(--font-mono);
     font-weight: 700;
@@ -631,7 +684,7 @@
     text-align:center;
     border-bottom: 2px solid var(--gold);
   }
-  .hd-table thead th:first-child{ border-right: 2px solid var(--gold); }
+  .hd-table thead th:first-child{ border-inline-end: 2px solid var(--gold); }
   .hd-table tbody td{
     padding: 6px 4px;
     text-align:center;
@@ -641,7 +694,7 @@
     color: var(--text);
     border-bottom: 1px solid rgba(244,233,216,0.08);
   }
-  .hd-table tbody td:first-child{ border-right: 2px solid var(--gold); }
+  .hd-table tbody td:first-child{ border-inline-end: 2px solid var(--gold); }
   .hd-table tbody tr:nth-child(odd){ background: rgba(255,255,255,0.02); }
   .hd-table tbody td.hd-empty{ color: var(--text-muted); }
   .hd-table tfoot td{
@@ -653,7 +706,7 @@
     color: var(--gold-light);
     border-top: 2px solid var(--gold);
   }
-  .hd-table tfoot td:first-child{ border-right: 2px solid var(--gold); }
+  .hd-table tfoot td:first-child{ border-inline-end: 2px solid var(--gold); }
 
   .win-emoji{
     text-align:center;
@@ -692,6 +745,18 @@
 
 <div id="dominoBg" aria-hidden="true"></div>
 
+<div class="corner-controls corner-start">
+  <button type="button" class="corner-btn" id="btnQuit" data-i18n-aria="quitLabel" aria-label="Quitter" title="Quitter">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4.5H6.5a1 1 0 0 0-1 1v13a1 1 0 0 0 1 1H15"/><path d="M10.5 12h9m0 0-3.2-3.2M19.5 12l-3.2 3.2"/></svg>
+  </button>
+</div>
+
+<div class="corner-controls corner-end">
+  <button type="button" class="corner-btn lang-btn" id="btnLang" data-i18n-aria="langLabel" aria-label="Langue" title="Langue">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="margin:0;"><circle cx="12" cy="12" r="8.3"/><path d="M3.7 12h16.6"/><path d="M12 3.7a13 13 0 0 1 0 16.6M12 3.7a13 13 0 0 0 0 16.6"/></svg>
+  </button>
+</div>
+
 <div class="app">
   <div class="logo-wrap">
     <img id="logoImg" alt="Smokey Domino's — Le compte exact" src="data:image/webp;base64,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">
@@ -701,15 +766,15 @@
     <table id="scoreTable">
       <thead>
         <tr>
-          <th id="headerUs" class="clickable" data-team="us">Nous<span class="photo-hint"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8a2 2 0 0 1 2-2h1.4l1-1.6A1.5 1.5 0 0 1 9.7 3.6h4.6a1.5 1.5 0 0 1 1.3.8l1 1.6H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8z"/><circle cx="12" cy="13" r="3.3"/></svg>Compter avec IA</span></th>
-          <th id="headerThem" class="clickable" data-team="them">Vous<span class="photo-hint"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8a2 2 0 0 1 2-2h1.4l1-1.6A1.5 1.5 0 0 1 9.7 3.6h4.6a1.5 1.5 0 0 1 1.3.8l1 1.6H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8z"/><circle cx="12" cy="13" r="3.3"/></svg>Compter avec IA</span></th>
+          <th id="headerUs" class="clickable" data-team="us"><span data-i18n="teamUs">Nous</span><span class="photo-hint"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8a2 2 0 0 1 2-2h1.4l1-1.6A1.5 1.5 0 0 1 9.7 3.6h4.6a1.5 1.5 0 0 1 1.3.8l1 1.6H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8z"/><circle cx="12" cy="13" r="3.3"/></svg><span data-i18n="photoHint">Compter avec IA</span></span></th>
+          <th id="headerThem" class="clickable" data-team="them"><span data-i18n="teamThem">Vous</span><span class="photo-hint"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8a2 2 0 0 1 2-2h1.4l1-1.6A1.5 1.5 0 0 1 9.7 3.6h4.6a1.5 1.5 0 0 1 1.3.8l1 1.6H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8z"/><circle cx="12" cy="13" r="3.3"/></svg><span data-i18n="photoHint">Compter avec IA</span></span></th>
         </tr>
       </thead>
       <tbody id="scoreBody"></tbody>
       <tfoot>
         <tr>
-          <td><span class="total-label">Total</span><span id="totalUs">0</span></td>
-          <td><span class="total-label">Total</span><span id="totalThem">0</span></td>
+          <td><span class="total-label" data-i18n="totalLabel">Total</span><span id="totalUs">0</span></td>
+          <td><span class="total-label" data-i18n="totalLabel">Total</span><span id="totalThem">0</span></td>
         </tr>
       </tfoot>
     </table>
@@ -724,17 +789,17 @@
   </div>
 
   <div class="actions">
-    <button class="btn btn-gold" id="btnSave"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 4.5A1 1 0 0 1 5.5 3.5h9.6L19 8v11.5a1 1 0 0 1-1 1H5.5a1 1 0 0 1-1-1v-15z"/><path d="M8 3.5v5h6v-5"/><rect x="8" y="13.5" width="8" height="6"/></svg>Enregistrer</button>
-    <button class="btn" id="btnHistory"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.3"/><path d="M12 7.5v5l3.3 1.9"/></svg>Historique</button>
-    <button class="btn btn-danger" id="btnReset"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12a7.5 7.5 0 1 1 2.5 5.6"/><path d="M4.5 17v-5h5"/></svg>Réinitialiser</button>
+    <button class="btn btn-gold" id="btnSave"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 4.5A1 1 0 0 1 5.5 3.5h9.6L19 8v11.5a1 1 0 0 1-1 1H5.5a1 1 0 0 1-1-1v-15z"/><path d="M8 3.5v5h6v-5"/><rect x="8" y="13.5" width="8" height="6"/></svg><span data-i18n="btnSave">Enregistrer</span></button>
+    <button class="btn" id="btnHistory"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.3"/><path d="M12 7.5v5l3.3 1.9"/></svg><span data-i18n="btnHistory">Historique</span></button>
+    <button class="btn btn-danger" id="btnReset"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12a7.5 7.5 0 1 1 2.5 5.6"/><path d="M4.5 17v-5h5"/></svg><span data-i18n="btnReset">Réinitialiser</span></button>
   </div>
 
   <div id="installBanner">
-    <p>Installer Smokey Domino's sur cet appareil ?</p>
-    <button class="btn btn-gold" id="btnInstall">Installer</button>
+    <p data-i18n="installPrompt">Installer Smokey Domino's sur cet appareil ?</p>
+    <button class="btn btn-gold" id="btnInstall" data-i18n="installBtn">Installer</button>
   </div>
 
-  <footer class="credits">Premier à 100 points remporte la partie</footer>
+  <footer class="credits" data-i18n="credits">Premier à 100 points remporte la partie</footer>
 </div>
 
 <input type="file" id="fileInput" accept="image/*" capture="environment">
@@ -744,7 +809,7 @@
   <div class="modal" style="max-width:260px;">
     <div class="modal-body" style="padding:34px 20px; flex-shrink:0;">
       <div class="loading-spinner"></div>
-      <p class="loading-text">Analyse de la photo…</p>
+      <p class="loading-text" data-i18n="loadingText">Analyse de la photo…</p>
     </div>
   </div>
 </div>
@@ -752,42 +817,42 @@
 <!-- Photo confirmation modal -->
 <div class="modal-overlay" id="photoModalOverlay">
   <div class="modal">
-    <div class="modal-title">Points détectés</div>
+    <div class="modal-title" data-i18n="pointsDetectedTitle">Points détectés</div>
     <div class="modal-body">
       <div class="photo-preview-wrap" id="photoPreviewWrap">
         <canvas id="photoCanvas"></canvas>
         <button type="button" class="zoom-reset-btn" id="btnResetZoom">1:1</button>
       </div>
-      <p class="zoom-hint"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.3" cy="10.3" r="6.3"/><path d="M19.5 19.5l-4.8-4.8"/></svg>Pincez, faites glisser ou double-tapez la photo pour zoomer</p>
+      <p class="zoom-hint"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.3" cy="10.3" r="6.3"/><path d="M19.5 19.5l-4.8-4.8"/></svg><span data-i18n="zoomHint">Pincez, faites glisser ou double-tapez la photo pour zoomer</span></p>
       <span class="field-label" id="photoTeamLabel">Score pour l'équipe</span>
       <input type="text" pattern="[0-9]*" inputmode="numeric" enterkeyhint="done" class="count-input" id="detectedCount" value="0">
     </div>
     <div class="modal-actions">
-      <button class="btn" id="btnRetake"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10a8 8 0 0 1 14-4.9M20 5v4h-4"/><path d="M20 14a8 8 0 0 1-14 4.9M4 19v-4h4"/></svg>Reprendre</button>
-      <button class="btn btn-gold" id="btnConfirmPhoto"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>Valider</button>
+      <button class="btn" id="btnRetake"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10a8 8 0 0 1 14-4.9M20 5v4h-4"/><path d="M20 14a8 8 0 0 1-14 4.9M4 19v-4h4"/></svg><span data-i18n="btnRetake">Reprendre</span></button>
+      <button class="btn btn-gold" id="btnConfirmPhoto"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg><span data-i18n="btnConfirmPhoto">Valider</span></button>
     </div>
-    <div class="modal-cancel-link"><a id="btnCancelPhoto">Annuler</a></div>
+    <div class="modal-cancel-link"><a id="btnCancelPhoto" data-i18n="btnCancel">Annuler</a></div>
   </div>
 </div>
 
 <!-- Save game modal -->
 <div class="modal-overlay" id="saveModalOverlay">
   <div class="modal">
-    <div class="modal-title">Enregistrer la partie</div>
+    <div class="modal-title" data-i18n="saveGameTitle">Enregistrer la partie</div>
     <div class="modal-body">
-      <div class="team-block-title">Équipe Nous</div>
-      <input type="text" class="name-input" id="usPlayer1" placeholder="Joueur 1 (requis)">
-      <input type="text" class="name-input" id="usPlayer2" placeholder="Joueur 2 (optionnel)">
+      <div class="team-block-title" id="usBlockTitle">Équipe Nous</div>
+      <input type="text" class="name-input" id="usPlayer1" data-i18n-placeholder="player1Placeholder" placeholder="Joueur 1 (requis)">
+      <input type="text" class="name-input" id="usPlayer2" data-i18n-placeholder="player2Placeholder" placeholder="Joueur 2 (optionnel)">
 
-      <div class="team-block-title">Équipe Vous</div>
-      <input type="text" class="name-input" id="themPlayer1" placeholder="Joueur 1 (requis)">
-      <input type="text" class="name-input" id="themPlayer2" placeholder="Joueur 2 (optionnel)">
+      <div class="team-block-title" id="themBlockTitle">Équipe Vous</div>
+      <input type="text" class="name-input" id="themPlayer1" data-i18n-placeholder="player1Placeholder" placeholder="Joueur 1 (requis)">
+      <input type="text" class="name-input" id="themPlayer2" data-i18n-placeholder="player2Placeholder" placeholder="Joueur 2 (optionnel)">
 
-      <div class="error-text" id="saveError">Merci d'indiquer au moins un joueur par équipe.</div>
+      <div class="error-text" id="saveError" data-i18n="saveError">Merci d'indiquer au moins un joueur par équipe.</div>
     </div>
     <div class="modal-actions">
-      <button class="btn" id="btnCancelSave">Annuler</button>
-      <button class="btn btn-gold" id="btnConfirmSave">Enregistrer</button>
+      <button class="btn" id="btnCancelSave" data-i18n="btnCancel">Annuler</button>
+      <button class="btn btn-gold" id="btnConfirmSave" data-i18n="btnSave">Enregistrer</button>
     </div>
   </div>
 </div>
@@ -795,10 +860,10 @@
 <!-- History modal -->
 <div class="modal-overlay" id="historyModalOverlay">
   <div class="modal">
-    <div class="modal-title">Historique des parties</div>
+    <div class="modal-title" data-i18n="historyTitle">Historique des parties</div>
     <div class="modal-body" id="historyBody"></div>
     <div class="modal-actions">
-      <button class="btn btn-gold" id="btnCloseHistory" style="flex:1;">Fermer</button>
+      <button class="btn btn-gold" id="btnCloseHistory" style="flex:1;" data-i18n="btnClose">Fermer</button>
     </div>
   </div>
 </div>
@@ -806,12 +871,12 @@
 <!-- History entry detail modal -->
 <div class="modal-overlay" id="historyDetailModalOverlay">
   <div class="modal">
-    <div class="modal-title">Détail de la partie</div>
+    <div class="modal-title" data-i18n="historyDetailTitle">Détail de la partie</div>
     <div class="modal-body">
       <div class="hd-meta" id="historyDetailMeta"></div>
       <table class="hd-table">
         <thead>
-          <tr><th>Nous</th><th>Vous</th></tr>
+          <tr><th data-i18n="teamUs">Nous</th><th data-i18n="teamThem">Vous</th></tr>
         </thead>
         <tbody id="historyDetailBody"></tbody>
         <tfoot>
@@ -820,7 +885,7 @@
       </table>
     </div>
     <div class="modal-actions">
-      <button class="btn btn-gold" id="btnCloseHistoryDetail" style="flex:1;">Fermer</button>
+      <button class="btn btn-gold" id="btnCloseHistoryDetail" style="flex:1;" data-i18n="btnClose">Fermer</button>
     </div>
   </div>
 </div>
@@ -831,11 +896,11 @@
     <div class="modal-body" style="padding-top:20px;">
       <div class="win-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v4a5 5 0 0 1-10 0V4z"/><path d="M7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3"/><path d="M12 13v3.5"/><path d="M9 20.5h6"/><path d="M9.8 16.5h4.4v1.8a2.2 2.2 0 0 1-4.4 0v-1.8z"/></svg></div>
       <div class="win-team" id="winTeamLabel">Nous</div>
-      <p class="win-sub">gagne la partie avec 100 points ou plus !</p>
-      <p class="win-sub">Félicitations !</p>
+      <p class="win-sub" id="winSubLine1" data-i18n="winSubLine1">gagne la partie avec 100 points ou plus !</p>
+      <p class="win-sub" data-i18n="winSubLine2">Félicitations !</p>
     </div>
     <div class="modal-actions">
-      <button class="btn btn-gold" id="btnCloseWin" style="flex:1;">Voir le tableau final</button>
+      <button class="btn btn-gold" id="btnCloseWin" style="flex:1;" data-i18n="btnCloseWin">Voir le tableau final</button>
     </div>
   </div>
 </div>
@@ -843,13 +908,24 @@
 <!-- Generic confirmation modal (reset, delete history entry, ...) -->
 <div class="modal-overlay" id="confirmModalOverlay">
   <div class="modal">
-    <div class="modal-title" id="confirmModalTitle">Confirmer</div>
+    <div class="modal-title" id="confirmModalTitle" data-i18n="confirmDefaultTitle">Confirmer</div>
     <div class="modal-body">
       <p class="confirm-text" id="confirmModalText"></p>
     </div>
     <div class="modal-actions">
-      <button class="btn" id="btnConfirmModalCancel">Annuler</button>
-      <button class="btn btn-danger-solid" id="btnConfirmModalOk">Oui</button>
+      <button class="btn" id="btnConfirmModalCancel" data-i18n="btnCancel">Annuler</button>
+      <button class="btn btn-danger-solid" id="btnConfirmModalOk" data-i18n="btnYes">Oui</button>
+    </div>
+  </div>
+</div>
+
+<!-- Language selection modal -->
+<div class="modal-overlay" id="langModalOverlay">
+  <div class="modal">
+    <div class="modal-title" id="langModalTitle" data-i18n="langLabel">Langue</div>
+    <div class="modal-body" id="langOptionsBody"></div>
+    <div class="modal-actions">
+      <button class="btn btn-gold" id="btnCloseLang" style="flex:1;" data-i18n="btnClose">Fermer</button>
     </div>
   </div>
 </div>
@@ -867,9 +943,232 @@
   var TARGET = 100;
   var STORAGE_CURRENT = 'smokeyDominosCurrentGame';
   var STORAGE_HISTORY = 'smokeyDominosHistory';
+  var STORAGE_LANG = 'smokeyDominosLang';
 
   /** @type {{rows: Array<{us: number|null, them: number|null}>, winnerAnnounced: boolean}} */
   var state = null;
+
+  /* ---------------------------------------------------------------------
+   * i18n
+   * ------------------------------------------------------------------- */
+  var RTL_LANGS = ['ar'];
+  var LANG_NAMES = { fr:'Français', en:'English', es:'Español', it:'Italiano', ru:'Русский', ar:'العربية' };
+  var DATE_LOCALES = { fr:'fr-FR', en:'en-US', es:'es-ES', it:'it-IT', ru:'ru-RU', ar:'ar' };
+
+  var I18N = {
+    fr: {
+      teamUs: 'Nous', teamThem: 'Vous', photoHint: 'Compter avec IA', totalLabel: 'Total',
+      installPrompt: "Installer Smokey Domino's sur cet appareil ?", installBtn: 'Installer',
+      credits: 'Premier à 100 points remporte la partie', loadingText: 'Analyse de la photo…',
+      pointsDetectedTitle: 'Points détectés', zoomHint: 'Pincez, faites glisser ou double-tapez la photo pour zoomer',
+      scoreForTeam: "Score pour l'équipe", btnRetake: 'Reprendre', btnConfirmPhoto: 'Valider', btnCancel: 'Annuler',
+      saveGameTitle: 'Enregistrer la partie', teamBlockTitle: 'Équipe {team}',
+      player1Placeholder: 'Joueur 1 (requis)', player2Placeholder: 'Joueur 2 (optionnel)',
+      saveError: "Merci d'indiquer au moins un joueur par équipe.", btnSave: 'Enregistrer',
+      btnHistory: 'Historique', btnReset: 'Réinitialiser', historyTitle: 'Historique des parties',
+      btnClose: 'Fermer', historyDetailTitle: 'Détail de la partie',
+      winSubLine1: 'gagne la partie avec 100 points ou plus !', winSubLine2: 'Félicitations !',
+      btnCloseWin: 'Voir le tableau final', btnYes: 'Oui', confirmDefaultTitle: 'Confirmer',
+      leadEqual: 'Égalité', leadUs: 'Nous menons', leadThem: 'Vous menez', leadOf: 'de',
+      pointSingular: 'point', pointPlural: 'points', dateTimeSep: 'à',
+      historyEmpty: 'Aucune partie enregistrée pour le moment.',
+      confirmDeleteTitle: 'Supprimer', confirmDeleteText: "Supprimer cette partie de l'historique ?",
+      confirmResetTitle: 'Réinitialiser', confirmResetText: 'Êtes-vous sûr de vouloir réinitialiser ?',
+      toastSaved: 'Partie enregistrée', quitLabel: 'Quitter',
+      quitFallback: "Fermez l'onglet ou balayez l'application pour quitter.", langLabel: 'Langue'
+    },
+    en: {
+      teamUs: 'Us', teamThem: 'You', photoHint: 'Count with AI', totalLabel: 'Total',
+      installPrompt: "Install Smokey Domino's on this device?", installBtn: 'Install',
+      credits: 'First to 100 points wins the game', loadingText: 'Analyzing photo…',
+      pointsDetectedTitle: 'Points detected', zoomHint: 'Pinch, drag or double-tap the photo to zoom',
+      scoreForTeam: 'Score for team', btnRetake: 'Retake', btnConfirmPhoto: 'Confirm', btnCancel: 'Cancel',
+      saveGameTitle: 'Save the game', teamBlockTitle: 'Team {team}',
+      player1Placeholder: 'Player 1 (required)', player2Placeholder: 'Player 2 (optional)',
+      saveError: 'Please enter at least one player per team.', btnSave: 'Save',
+      btnHistory: 'History', btnReset: 'Reset', historyTitle: 'Game history',
+      btnClose: 'Close', historyDetailTitle: 'Game detail',
+      winSubLine1: 'wins the game with 100 points or more!', winSubLine2: 'Congratulations!',
+      btnCloseWin: 'See final scoreboard', btnYes: 'Yes', confirmDefaultTitle: 'Confirm',
+      leadEqual: 'Tied', leadUs: "We're leading", leadThem: "You're leading", leadOf: 'by',
+      pointSingular: 'point', pointPlural: 'points', dateTimeSep: 'at',
+      historyEmpty: 'No games saved yet.',
+      confirmDeleteTitle: 'Delete', confirmDeleteText: 'Delete this game from history?',
+      confirmResetTitle: 'Reset', confirmResetText: 'Are you sure you want to reset?',
+      toastSaved: 'Game saved', quitLabel: 'Quit',
+      quitFallback: 'Close the tab or swipe the app away to quit.', langLabel: 'Language'
+    },
+    es: {
+      teamUs: 'Nosotros', teamThem: 'Vosotros', photoHint: 'Contar con IA', totalLabel: 'Total',
+      installPrompt: '¿Instalar Smokey Domino\'s en este dispositivo?', installBtn: 'Instalar',
+      credits: 'El primero en llegar a 100 puntos gana la partida', loadingText: 'Analizando la foto…',
+      pointsDetectedTitle: 'Puntos detectados', zoomHint: 'Pellizca, arrastra o toca dos veces la foto para hacer zoom',
+      scoreForTeam: 'Puntuación para el equipo', btnRetake: 'Repetir', btnConfirmPhoto: 'Confirmar', btnCancel: 'Cancelar',
+      saveGameTitle: 'Guardar la partida', teamBlockTitle: 'Equipo {team}',
+      player1Placeholder: 'Jugador 1 (requerido)', player2Placeholder: 'Jugador 2 (opcional)',
+      saveError: 'Indica al menos un jugador por equipo.', btnSave: 'Guardar',
+      btnHistory: 'Historial', btnReset: 'Reiniciar', historyTitle: 'Historial de partidas',
+      btnClose: 'Cerrar', historyDetailTitle: 'Detalle de la partida',
+      winSubLine1: '¡gana la partida con 100 puntos o más!', winSubLine2: '¡Felicidades!',
+      btnCloseWin: 'Ver el marcador final', btnYes: 'Sí', confirmDefaultTitle: 'Confirmar',
+      leadEqual: 'Empate', leadUs: 'Vamos ganando', leadThem: 'Vais ganando', leadOf: 'por',
+      pointSingular: 'punto', pointPlural: 'puntos', dateTimeSep: 'a las',
+      historyEmpty: 'Aún no hay partidas guardadas.',
+      confirmDeleteTitle: 'Eliminar', confirmDeleteText: '¿Eliminar esta partida del historial?',
+      confirmResetTitle: 'Reiniciar', confirmResetText: '¿Seguro que quieres reiniciar?',
+      toastSaved: 'Partida guardada', quitLabel: 'Salir',
+      quitFallback: 'Cierra la pestaña o desliza la app para salir.', langLabel: 'Idioma'
+    },
+    it: {
+      teamUs: 'Noi', teamThem: 'Voi', photoHint: 'Conta con IA', totalLabel: 'Totale',
+      installPrompt: "Installare Smokey Domino's su questo dispositivo?", installBtn: 'Installa',
+      credits: 'Il primo a 100 punti vince la partita', loadingText: 'Analisi della foto…',
+      pointsDetectedTitle: 'Punti rilevati', zoomHint: 'Pizzica, trascina o tocca due volte la foto per ingrandire',
+      scoreForTeam: 'Punteggio per la squadra', btnRetake: 'Riprova', btnConfirmPhoto: 'Conferma', btnCancel: 'Annulla',
+      saveGameTitle: 'Salva la partita', teamBlockTitle: 'Squadra {team}',
+      player1Placeholder: 'Giocatore 1 (obbligatorio)', player2Placeholder: 'Giocatore 2 (facoltativo)',
+      saveError: 'Indica almeno un giocatore per squadra.', btnSave: 'Salva',
+      btnHistory: 'Cronologia', btnReset: 'Ripristina', historyTitle: 'Cronologia partite',
+      btnClose: 'Chiudi', historyDetailTitle: 'Dettaglio partita',
+      winSubLine1: 'vince la partita con 100 punti o più!', winSubLine2: 'Congratulazioni!',
+      btnCloseWin: 'Vedi il tabellone finale', btnYes: 'Sì', confirmDefaultTitle: 'Conferma',
+      leadEqual: 'Pareggio', leadUs: 'Siamo in vantaggio', leadThem: 'Siete in vantaggio', leadOf: 'di',
+      pointSingular: 'punto', pointPlural: 'punti', dateTimeSep: 'alle',
+      historyEmpty: 'Nessuna partita salvata per ora.',
+      confirmDeleteTitle: 'Elimina', confirmDeleteText: 'Eliminare questa partita dalla cronologia?',
+      confirmResetTitle: 'Ripristina', confirmResetText: 'Sei sicuro di voler ripristinare?',
+      toastSaved: 'Partita salvata', quitLabel: 'Esci',
+      quitFallback: "Chiudi la scheda o scorri via l'app per uscire.", langLabel: 'Lingua'
+    },
+    ru: {
+      teamUs: 'Мы', teamThem: 'Вы', photoHint: 'Считать с ИИ', totalLabel: 'Итого',
+      installPrompt: 'Установить Smokey Domino\'s на это устройство?', installBtn: 'Установить',
+      credits: 'Первый, набравший 100 очков, побеждает', loadingText: 'Анализ фото…',
+      pointsDetectedTitle: 'Обнаруженные очки', zoomHint: 'Сожмите, перетащите или дважды коснитесь фото, чтобы увеличить',
+      scoreForTeam: 'Счёт команды', btnRetake: 'Переснять', btnConfirmPhoto: 'Подтвердить', btnCancel: 'Отмена',
+      saveGameTitle: 'Сохранить партию', teamBlockTitle: 'Команда «{team}»',
+      player1Placeholder: 'Игрок 1 (обязательно)', player2Placeholder: 'Игрок 2 (необязательно)',
+      saveError: 'Укажите хотя бы одного игрока в каждой команде.', btnSave: 'Сохранить',
+      btnHistory: 'История', btnReset: 'Сбросить', historyTitle: 'История игр',
+      btnClose: 'Закрыть', historyDetailTitle: 'Детали партии',
+      winSubLine1: 'побеждает, набрав 100 очков или больше!', winSubLine2: 'Поздравляем!',
+      btnCloseWin: 'Посмотреть итоговую таблицу', btnYes: 'Да', confirmDefaultTitle: 'Подтвердить',
+      leadEqual: 'Ничья', leadUs: 'Мы впереди', leadThem: 'Вы впереди', leadOf: 'на',
+      pointSingular: 'очко', pointPlural: 'очков', dateTimeSep: 'в',
+      historyEmpty: 'Пока нет сохранённых партий.',
+      confirmDeleteTitle: 'Удалить', confirmDeleteText: 'Удалить эту партию из истории?',
+      confirmResetTitle: 'Сбросить', confirmResetText: 'Вы уверены, что хотите сбросить?',
+      toastSaved: 'Партия сохранена', quitLabel: 'Выйти',
+      quitFallback: 'Закройте вкладку или смахните приложение, чтобы выйти.', langLabel: 'Язык'
+    },
+    ar: {
+      teamUs: 'نحن', teamThem: 'أنتم', photoHint: 'عدّ بالذكاء الاصطناعي', totalLabel: 'المجموع',
+      installPrompt: 'هل تريد تثبيت Smokey Domino\'s على هذا الجهاز؟', installBtn: 'تثبيت',
+      credits: 'أول من يصل إلى 100 نقطة يفوز بالجولة', loadingText: 'جارٍ تحليل الصورة…',
+      pointsDetectedTitle: 'النقاط المكتشفة', zoomHint: 'اقرص الصورة أو اسحبها أو انقر مرتين لتكبيرها',
+      scoreForTeam: 'نقاط فريق', btnRetake: 'إعادة التقاط', btnConfirmPhoto: 'تأكيد', btnCancel: 'إلغاء',
+      saveGameTitle: 'حفظ الجولة', teamBlockTitle: 'فريق {team}',
+      player1Placeholder: 'اللاعب 1 (مطلوب)', player2Placeholder: 'اللاعب 2 (اختياري)',
+      saveError: 'يرجى إدخال لاعب واحد على الأقل لكل فريق.', btnSave: 'حفظ',
+      btnHistory: 'السجل', btnReset: 'إعادة التعيين', historyTitle: 'سجل الجولات',
+      btnClose: 'إغلاق', historyDetailTitle: 'تفاصيل الجولة',
+      winSubLine1: 'يفوز بالجولة بـ 100 نقطة أو أكثر!', winSubLine2: 'تهانينا!',
+      btnCloseWin: 'عرض الجدول النهائي', btnYes: 'نعم', confirmDefaultTitle: 'تأكيد',
+      leadEqual: 'تعادل', leadUs: 'نحن متقدمون', leadThem: 'أنتم متقدمون', leadOf: 'بفارق',
+      pointSingular: 'نقطة', pointPlural: 'نقاط', dateTimeSep: 'الساعة',
+      historyEmpty: 'لا توجد جولات محفوظة بعد.',
+      confirmDeleteTitle: 'حذف', confirmDeleteText: 'هل تريد حذف هذه الجولة من السجل؟',
+      confirmResetTitle: 'إعادة التعيين', confirmResetText: 'هل أنت متأكد من رغبتك في إعادة التعيين؟',
+      toastSaved: 'تم حفظ الجولة', quitLabel: 'خروج',
+      quitFallback: 'أغلق التبويب أو اسحب التطبيق للخروج.', langLabel: 'اللغة'
+    }
+  };
+
+  function getInitialLang(){
+    try{
+      var saved = localStorage.getItem(STORAGE_LANG);
+      if (saved && I18N[saved]) return saved;
+    }catch(e){}
+    var nav = ((navigator.language || navigator.userLanguage || '') + '').slice(0, 2).toLowerCase();
+    return I18N[nav] ? nav : 'fr';
+  }
+
+  var currentLang = getInitialLang();
+
+  function t(key){
+    var dict = I18N[currentLang] || I18N.fr;
+    var val = dict[key];
+    if (val == null) val = I18N.fr[key];
+    return val == null ? key : val;
+  }
+
+  function setLang(lang){
+    if (!I18N[lang]) return;
+    currentLang = lang;
+    try{ localStorage.setItem(STORAGE_LANG, lang); }catch(e){}
+    applyLanguage();
+  }
+
+  var SUPPORTED_LANGS = ['fr', 'en', 'es', 'it', 'ru', 'ar'];
+
+  function renderLangOptions(){
+    var body = document.getElementById('langOptionsBody');
+    if (!body) return;
+    body.innerHTML = '';
+    for (var i = 0; i < SUPPORTED_LANGS.length; i++){
+      (function(code){
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'lang-option' + (code === currentLang ? ' active' : '');
+        btn.innerHTML = '<span>' + LANG_NAMES[code] + '</span><svg class="lang-check icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="margin:0;"><path d="M4 12.5l5 5L20 6.5"/></svg>';
+        btn.addEventListener('click', function(){
+          setLang(code);
+          closeModal(document.getElementById('langModalOverlay'));
+        });
+        body.appendChild(btn);
+      })(SUPPORTED_LANGS[i]);
+    }
+  }
+
+  function applyLanguage(){
+    document.documentElement.setAttribute('lang', currentLang);
+    document.documentElement.setAttribute('dir', RTL_LANGS.indexOf(currentLang) > -1 ? 'rtl' : 'ltr');
+
+    var nodes = document.querySelectorAll('[data-i18n]');
+    for (var i = 0; i < nodes.length; i++){
+      nodes[i].textContent = t(nodes[i].getAttribute('data-i18n'));
+    }
+    var placeholders = document.querySelectorAll('[data-i18n-placeholder]');
+    for (var j = 0; j < placeholders.length; j++){
+      placeholders[j].setAttribute('placeholder', t(placeholders[j].getAttribute('data-i18n-placeholder')));
+    }
+    var ariaEls = document.querySelectorAll('[data-i18n-aria]');
+    for (var k = 0; k < ariaEls.length; k++){
+      var label = t(ariaEls[k].getAttribute('data-i18n-aria'));
+      ariaEls[k].setAttribute('aria-label', label);
+      ariaEls[k].setAttribute('title', label);
+    }
+
+    var usBlockTitleEl = document.getElementById('usBlockTitle');
+    var themBlockTitleEl = document.getElementById('themBlockTitle');
+    if (usBlockTitleEl) usBlockTitleEl.textContent = t('teamBlockTitle').replace('{team}', t('teamUs'));
+    if (themBlockTitleEl) themBlockTitleEl.textContent = t('teamBlockTitle').replace('{team}', t('teamThem'));
+
+    if (typeof photoTeamLabel !== 'undefined' && photoTeamLabel){
+      photoTeamLabel.textContent = t('scoreForTeam') + (typeof currentPhotoTeam !== 'undefined' && currentPhotoTeam
+        ? ' ' + (currentPhotoTeam === 'us' ? t('teamUs') : t('teamThem'))
+        : '');
+    }
+
+    if (typeof winTeamLabel !== 'undefined' && winTeamLabel && typeof lastWinnerTeam !== 'undefined' && lastWinnerTeam){
+      winTeamLabel.textContent = lastWinnerTeam === 'us' ? t('teamUs') : t('teamThem');
+    }
+
+    renderLangOptions();
+
+    if (state) updateTotals();
+    if (typeof renderHistory === 'function') { try{ renderHistory(); }catch(e){} }
+  }
 
   var scoreBody = document.getElementById('scoreBody');
   var totalUsEl = document.getElementById('totalUs');
@@ -1051,13 +1350,14 @@
       totalUsEl.classList.remove('leading');
       totalThemEl.classList.remove('leading');
     } else if (sumUs === sumThem){
-      leadTextEl.textContent = 'Égalité';
+      leadTextEl.textContent = t('leadEqual');
       totalUsEl.classList.remove('leading');
       totalThemEl.classList.remove('leading');
     } else {
       var diff = Math.abs(sumUs - sumThem);
-      var leader = sumUs > sumThem ? 'Nous menons' : 'Vous menez';
-      leadTextEl.textContent = leader + ' de ' + diff + ' point' + (diff > 1 ? 's' : '');
+      var leader = sumUs > sumThem ? t('leadUs') : t('leadThem');
+      var pointWord = diff > 1 ? t('pointPlural') : t('pointSingular');
+      leadTextEl.textContent = leader + ' ' + t('leadOf') + ' ' + diff + ' ' + pointWord;
       totalUsEl.classList.toggle('leading', sumUs > sumThem);
       totalThemEl.classList.toggle('leading', sumThem > sumUs);
     }
@@ -1083,12 +1383,12 @@
 
     if (state.winnerAnnounced) return;
 
-    var winner = totals.us >= TARGET && totals.them >= TARGET
-      ? (totals.us >= totals.them ? 'Nous' : 'Vous')
-      : (totals.us >= TARGET ? 'Nous' : 'Vous');
+    var winnerTeam = totals.us >= TARGET && totals.them >= TARGET
+      ? (totals.us >= totals.them ? 'us' : 'them')
+      : (totals.us >= TARGET ? 'us' : 'them');
     state.winnerAnnounced = true;
     persistState();
-    showWinModal(winner);
+    showWinModal(winnerTeam);
   }
 
   function setRowValue(rowIndex, team, value){
@@ -1526,7 +1826,7 @@
           }
 
           detectedCountInput.value = String(pips.length);
-          photoTeamLabel.textContent = 'Score pour l\'équipe ' + (currentPhotoTeam === 'us' ? 'Nous' : 'Vous');
+          photoTeamLabel.textContent = t('scoreForTeam') + ' ' + (currentPhotoTeam === 'us' ? t('teamUs') : t('teamThem'));
           resetZoom(false);
           closeModal(photoLoadingOverlay);
           openModal(photoModalOverlay);
@@ -1680,6 +1980,32 @@
   });
 
   /* ---------------------------------------------------------------------
+   * Language switcher
+   * ------------------------------------------------------------------- */
+
+  var langModalOverlay = document.getElementById('langModalOverlay');
+
+  document.getElementById('btnLang').addEventListener('click', function(){
+    renderLangOptions();
+    openModal(langModalOverlay);
+  });
+
+  document.getElementById('btnCloseLang').addEventListener('click', function(){
+    closeModal(langModalOverlay);
+  });
+
+  /* ---------------------------------------------------------------------
+   * Quit button
+   * ------------------------------------------------------------------- */
+
+  document.getElementById('btnQuit').addEventListener('click', function(){
+    try{ window.close(); }catch(e){}
+    setTimeout(function(){
+      showToast(t('quitFallback'));
+    }, 300);
+  });
+
+  /* ---------------------------------------------------------------------
    * Save game
    * ------------------------------------------------------------------- */
 
@@ -1737,7 +2063,7 @@
 
     closeModal(saveModalOverlay);
     vibrate(15);
-    showToast('<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>Partie enregistrée');
+    showToast('<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>' + t('toastSaved'));
   });
 
   /* ---------------------------------------------------------------------
@@ -1758,8 +2084,9 @@
   function formatDate(iso){
     try{
       var d = new Date(iso);
-      return d.toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric' }) +
-        ' à ' + d.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
+      var locale = DATE_LOCALES[currentLang] || 'fr-FR';
+      return d.toLocaleDateString(locale, { day:'2-digit', month:'2-digit', year:'numeric' }) +
+        ' ' + t('dateTimeSep') + ' ' + d.toLocaleTimeString(locale, { hour:'2-digit', minute:'2-digit' });
     }catch(e){ return iso; }
   }
 
@@ -1770,7 +2097,7 @@
     if (history.length === 0){
       var empty = document.createElement('div');
       empty.className = 'history-empty';
-      empty.textContent = 'Aucune partie enregistrée pour le moment.';
+      empty.textContent = t('historyEmpty');
       historyBody.appendChild(empty);
       return;
     }
@@ -1799,7 +2126,7 @@
 
       var score = document.createElement('div');
       score.className = 'hi-score';
-      score.textContent = 'Nous ' + entry.totals.us + ' – ' + entry.totals.them + ' Vous';
+      score.textContent = t('teamUs') + ' ' + entry.totals.us + ' – ' + entry.totals.them + ' ' + t('teamThem');
 
       info.appendChild(date);
       info.appendChild(players);
@@ -1812,7 +2139,7 @@
       delBtn.className = 'hi-del';
       delBtn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 6.5h15"/><path d="M9 6.5V4.7A1.2 1.2 0 0 1 10.2 3.5h3.6A1.2 1.2 0 0 1 15 4.7V6.5"/><path d="M6.5 6.5l1 13a1.3 1.3 0 0 0 1.3 1.2h6.4a1.3 1.3 0 0 0 1.3-1.2l1-13"/><path d="M10.2 10v7M13.8 10v7"/></svg>';
       delBtn.addEventListener('click', function(){
-        askConfirmation('Supprimer', 'Supprimer cette partie de l\'historique ?', function(){
+        askConfirmation(t('confirmDeleteTitle'), t('confirmDeleteText'), function(){
           var list = loadHistory().filter(function(g){ return g.id !== entry.id; });
           saveHistory(list);
           renderHistory();
@@ -1897,7 +2224,7 @@
    * ------------------------------------------------------------------- */
 
   document.getElementById('btnReset').addEventListener('click', function(){
-    askConfirmation('Réinitialiser', 'Êtes-vous sûr de vouloir réinitialiser ?', resetGame);
+    askConfirmation(t('confirmResetTitle'), t('confirmResetText'), resetGame);
   });
 
   /* ---------------------------------------------------------------------
@@ -1906,9 +2233,11 @@
 
   var winModalOverlay = document.getElementById('winModalOverlay');
   var winTeamLabel = document.getElementById('winTeamLabel');
+  var lastWinnerTeam = null;
 
-  function showWinModal(winner){
-    winTeamLabel.textContent = winner;
+  function showWinModal(winnerTeam){
+    lastWinnerTeam = winnerTeam;
+    winTeamLabel.textContent = winnerTeam === 'us' ? t('teamUs') : t('teamThem');
     vibrate([40, 60, 40, 60, 90]);
     openModal(winModalOverlay);
   }
@@ -1961,6 +2290,7 @@
   state = loadState();
   renderAllRows();
   updateTotals();
+  applyLanguage();
   generateBackgroundDominoes();
 
 })();
