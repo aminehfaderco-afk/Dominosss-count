@@ -26,10 +26,14 @@
     --gold-dark: #8A6A1B;
     --cream: #F4E9D8;
     --text: #F4E9D8;
-    --text-muted: #A9BCB2;
+    --text-muted: #BFD3C8;
     --danger: #C1443C;
     --danger-light: #E3948C;
     --success: #4C8C5B;
+    --team-us: #E8C766;
+    --team-us-light: #F3DDA0;
+    --team-them: #6FC6C1;
+    --team-them-light: #A6E4E0;
     --shadow: rgba(0,0,0,0.45);
     --radius-lg: 20px;
     --radius-md: 14px;
@@ -40,6 +44,15 @@
   }
 
   *{ box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  .icon{
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.15em;
+    margin-right: .35em;
+    flex-shrink: 0;
+  }
+  .hi-del .icon{ margin-right: 0; }
 
   html,body{
     margin:0; padding:0; min-height:100%;
@@ -65,10 +78,12 @@
     position: fixed; inset:0;
     pointer-events:none;
     background-image:
-      radial-gradient(rgba(255,255,255,0.035) 1px, transparent 1px);
-    background-size: 3px 3px;
+      radial-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+      repeating-linear-gradient(45deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 4px),
+      repeating-linear-gradient(-45deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 1px, transparent 1px, transparent 4px);
+    background-size: 3px 3px, auto, auto;
     z-index: 0;
-    opacity: .5;
+    opacity: .6;
   }
 
   #dominoBg{
@@ -207,6 +222,11 @@
     color: var(--gold-light);
     border-top: 2px solid var(--gold);
   }
+  #totalUs{ color: var(--team-us-light); }
+  #totalThem{ color: var(--team-them-light); }
+  #scoreTable tfoot span.leading{
+    text-shadow: 0 0 12px currentColor;
+  }
   .total-label{
     display:block;
     font-family: var(--font-body);
@@ -240,9 +260,10 @@
     height:100%;
     width:0%;
     border-radius: 999px;
-    background: linear-gradient(90deg, var(--gold), var(--gold-light));
     transition: width .35s ease;
   }
+  #progressUs{ background: linear-gradient(90deg, var(--gold), var(--team-us-light)); }
+  #progressThem{ background: linear-gradient(90deg, #3E9C96, var(--team-them-light)); }
   .lead-text{
     text-align:center;
     margin: 9px 0 0;
@@ -564,6 +585,14 @@
     margin: 3px 0;
     overflow-wrap: anywhere;
   }
+  .hi-winner{
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+  }
+  .hi-winner-us{ color: var(--team-us-light); }
+  .hi-winner-them{ color: var(--team-them-light); }
+  .hi-trophy{ margin-right: .25em; width: .85em; height: .85em; }
   .history-item .hi-score{
     font-family: var(--font-mono);
     font-weight: 700;
@@ -628,9 +657,11 @@
 
   .win-emoji{
     text-align:center;
-    font-size: 46px;
     margin: 6px 0 0;
+    color: var(--gold-light);
+    filter: drop-shadow(0 3px 8px rgba(0,0,0,0.45));
   }
+  .win-emoji svg{ width: 56px; height: 56px; }
   .win-team{
     text-align:center;
     font-family: var(--font-title);
@@ -670,8 +701,8 @@
     <table id="scoreTable">
       <thead>
         <tr>
-          <th id="headerUs" class="clickable" data-team="us">Nous<span class="photo-hint">📷 Compter avec IA</span></th>
-          <th id="headerThem" class="clickable" data-team="them">Vous<span class="photo-hint">📷 Compter avec IA</span></th>
+          <th id="headerUs" class="clickable" data-team="us">Nous<span class="photo-hint"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8a2 2 0 0 1 2-2h1.4l1-1.6A1.5 1.5 0 0 1 9.7 3.6h4.6a1.5 1.5 0 0 1 1.3.8l1 1.6H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8z"/><circle cx="12" cy="13" r="3.3"/></svg>Compter avec IA</span></th>
+          <th id="headerThem" class="clickable" data-team="them">Vous<span class="photo-hint"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8a2 2 0 0 1 2-2h1.4l1-1.6A1.5 1.5 0 0 1 9.7 3.6h4.6a1.5 1.5 0 0 1 1.3.8l1 1.6H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8z"/><circle cx="12" cy="13" r="3.3"/></svg>Compter avec IA</span></th>
         </tr>
       </thead>
       <tbody id="scoreBody"></tbody>
@@ -693,9 +724,9 @@
   </div>
 
   <div class="actions">
-    <button class="btn btn-gold" id="btnSave">💾 Enregistrer</button>
-    <button class="btn" id="btnHistory">📜 Historique</button>
-    <button class="btn btn-danger" id="btnReset">↺ Réinitialiser</button>
+    <button class="btn btn-gold" id="btnSave"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 4.5A1 1 0 0 1 5.5 3.5h9.6L19 8v11.5a1 1 0 0 1-1 1H5.5a1 1 0 0 1-1-1v-15z"/><path d="M8 3.5v5h6v-5"/><rect x="8" y="13.5" width="8" height="6"/></svg>Enregistrer</button>
+    <button class="btn" id="btnHistory"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.3"/><path d="M12 7.5v5l3.3 1.9"/></svg>Historique</button>
+    <button class="btn btn-danger" id="btnReset"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12a7.5 7.5 0 1 1 2.5 5.6"/><path d="M4.5 17v-5h5"/></svg>Réinitialiser</button>
   </div>
 
   <div id="installBanner">
@@ -727,13 +758,13 @@
         <canvas id="photoCanvas"></canvas>
         <button type="button" class="zoom-reset-btn" id="btnResetZoom">1:1</button>
       </div>
-      <p class="zoom-hint">🔍 Pincez, faites glisser ou double-tapez la photo pour zoomer</p>
+      <p class="zoom-hint"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.3" cy="10.3" r="6.3"/><path d="M19.5 19.5l-4.8-4.8"/></svg>Pincez, faites glisser ou double-tapez la photo pour zoomer</p>
       <span class="field-label" id="photoTeamLabel">Score pour l'équipe</span>
       <input type="text" pattern="[0-9]*" inputmode="numeric" enterkeyhint="done" class="count-input" id="detectedCount" value="0">
     </div>
     <div class="modal-actions">
-      <button class="btn" id="btnRetake">🔄 Reprendre</button>
-      <button class="btn btn-gold" id="btnConfirmPhoto">✓ Valider</button>
+      <button class="btn" id="btnRetake"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10a8 8 0 0 1 14-4.9M20 5v4h-4"/><path d="M20 14a8 8 0 0 1-14 4.9M4 19v-4h4"/></svg>Reprendre</button>
+      <button class="btn btn-gold" id="btnConfirmPhoto"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>Valider</button>
     </div>
     <div class="modal-cancel-link"><a id="btnCancelPhoto">Annuler</a></div>
   </div>
@@ -798,7 +829,7 @@
 <div class="modal-overlay" id="winModalOverlay">
   <div class="modal">
     <div class="modal-body" style="padding-top:20px;">
-      <div class="win-emoji">🏆</div>
+      <div class="win-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v4a5 5 0 0 1-10 0V4z"/><path d="M7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3"/><path d="M12 13v3.5"/><path d="M9 20.5h6"/><path d="M9.8 16.5h4.4v1.8a2.2 2.2 0 0 1-4.4 0v-1.8z"/></svg></div>
       <div class="win-team" id="winTeamLabel">Nous</div>
       <p class="win-sub">gagne la partie avec 100 points ou plus !</p>
       <p class="win-sub">Félicitations !</p>
@@ -851,9 +882,9 @@
     if (navigator.vibrate){ try{ navigator.vibrate(pattern); }catch(e){} }
   }
 
-  function showToast(message){
+  function showToast(html){
     var toast = document.getElementById('toast');
-    toast.textContent = message;
+    toast.innerHTML = html;
     toast.classList.add('show');
     clearTimeout(showToast._t);
     showToast._t = setTimeout(function(){ toast.classList.remove('show'); }, 2200);
@@ -883,6 +914,12 @@
     if (v === null || v === undefined || v === '') return null;
     var n = Number(v);
     return isNaN(n) ? null : n;
+  }
+
+  function escapeHtml(str){
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
   }
 
   function persistState(){
@@ -1011,12 +1048,18 @@
 
     if (sumUs === 0 && sumThem === 0){
       leadTextEl.textContent = '';
+      totalUsEl.classList.remove('leading');
+      totalThemEl.classList.remove('leading');
     } else if (sumUs === sumThem){
       leadTextEl.textContent = 'Égalité';
+      totalUsEl.classList.remove('leading');
+      totalThemEl.classList.remove('leading');
     } else {
       var diff = Math.abs(sumUs - sumThem);
       var leader = sumUs > sumThem ? 'Nous menons' : 'Vous menez';
       leadTextEl.textContent = leader + ' de ' + diff + ' point' + (diff > 1 ? 's' : '');
+      totalUsEl.classList.toggle('leading', sumUs > sumThem);
+      totalThemEl.classList.toggle('leading', sumThem > sumUs);
     }
 
     return { us: sumUs, them: sumThem };
@@ -1694,7 +1737,7 @@
 
     closeModal(saveModalOverlay);
     vibrate(15);
-    showToast('Partie enregistrée ✓');
+    showToast('<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>Partie enregistrée');
   });
 
   /* ---------------------------------------------------------------------
@@ -1745,7 +1788,14 @@
 
       var players = document.createElement('div');
       players.className = 'hi-players';
-      players.textContent = entry.players.us.join(' & ') + ' vs ' + entry.players.them.join(' & ');
+      var winSide = entry.totals.us > entry.totals.them ? 'us' : (entry.totals.them > entry.totals.us ? 'them' : null);
+      var trophySvg = '<svg class="icon hi-trophy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v4a5 5 0 0 1-10 0V4z"/><path d="M7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3"/><path d="M12 13v3.5"/><path d="M9 20.5h6"/><path d="M9.8 16.5h4.4v1.8a2.2 2.2 0 0 1-4.4 0v-1.8z"/></svg>';
+      var usNames = escapeHtml(entry.players.us.join(' & '));
+      var themNames = escapeHtml(entry.players.them.join(' & '));
+      players.innerHTML =
+        (winSide === 'us' ? '<span class="hi-winner hi-winner-us">' + trophySvg + usNames + '</span>' : usNames) +
+        ' vs ' +
+        (winSide === 'them' ? '<span class="hi-winner hi-winner-them">' + trophySvg + themNames + '</span>' : themNames);
 
       var score = document.createElement('div');
       score.className = 'hi-score';
@@ -1760,7 +1810,7 @@
 
       var delBtn = document.createElement('button');
       delBtn.className = 'hi-del';
-      delBtn.textContent = '🗑';
+      delBtn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 6.5h15"/><path d="M9 6.5V4.7A1.2 1.2 0 0 1 10.2 3.5h3.6A1.2 1.2 0 0 1 15 4.7V6.5"/><path d="M6.5 6.5l1 13a1.3 1.3 0 0 0 1.3 1.2h6.4a1.3 1.3 0 0 0 1.3-1.2l1-13"/><path d="M10.2 10v7M13.8 10v7"/></svg>';
       delBtn.addEventListener('click', function(){
         askConfirmation('Supprimer', 'Supprimer cette partie de l\'historique ?', function(){
           var list = loadHistory().filter(function(g){ return g.id !== entry.id; });
@@ -1786,8 +1836,8 @@
     var dateLine = document.createElement('div');
     dateLine.textContent = formatDate(entry.date);
     var playersLine = document.createElement('div');
-    playersLine.innerHTML = '<strong>' + entry.players.us.join(' & ') + '</strong> vs <strong>' +
-      entry.players.them.join(' & ') + '</strong>';
+    playersLine.innerHTML = '<strong>' + escapeHtml(entry.players.us.join(' & ')) + '</strong> vs <strong>' +
+      escapeHtml(entry.players.them.join(' & ')) + '</strong>';
     historyDetailMeta.appendChild(dateLine);
     historyDetailMeta.appendChild(playersLine);
 
