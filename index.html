@@ -61,8 +61,8 @@
     display: flex;
     gap: 8px;
   }
-  .corner-controls.corner-start{ inset-inline-start: 14px; }
-  .corner-controls.corner-end{ inset-inline-end: 14px; }
+  .corner-controls.corner-start{ left: 14px; }
+  .corner-controls.corner-end{ right: 14px; }
   .corner-btn{
     width: 38px;
     height: 38px;
@@ -104,6 +104,7 @@
     color: var(--gold-light);
     font-weight: 600;
   }
+  .lang-flag{ font-size: 19px; margin-inline-end: 8px; }
   .lang-option .lang-check{ width: 18px; height: 18px; visibility: hidden; }
   .lang-option.active .lang-check{ visibility: visible; }
 
@@ -953,6 +954,7 @@
    * ------------------------------------------------------------------- */
   var RTL_LANGS = ['ar'];
   var LANG_NAMES = { fr:'Français', en:'English', es:'Español', it:'Italiano', ru:'Русский', ar:'العربية' };
+  var LANG_FLAGS = { fr:'🇫🇷', en:'🇬🇧', es:'🇪🇸', it:'🇮🇹', ru:'🇷🇺', ar:'🇩🇿' };
   var DATE_LOCALES = { fr:'fr-FR', en:'en-US', es:'es-ES', it:'it-IT', ru:'ru-RU', ar:'ar' };
 
   var I18N = {
@@ -975,7 +977,8 @@
       confirmDeleteTitle: 'Supprimer', confirmDeleteText: "Supprimer cette partie de l'historique ?",
       confirmResetTitle: 'Réinitialiser', confirmResetText: 'Êtes-vous sûr de vouloir réinitialiser ?',
       toastSaved: 'Partie enregistrée', quitLabel: 'Quitter',
-      quitFallback: "Fermez l'onglet ou balayez l'application pour quitter.", langLabel: 'Langue'
+      quitFallback: "Fermez l'onglet ou balayez l'application pour quitter.", langLabel: 'Langue',
+      quitConfirmTitle: 'Quitter', quitConfirmText: "Êtes-vous sûr de vouloir quitter l'application ?"
     },
     en: {
       teamUs: 'Us', teamThem: 'You', photoHint: 'Count with AI', totalLabel: 'Total',
@@ -996,7 +999,8 @@
       confirmDeleteTitle: 'Delete', confirmDeleteText: 'Delete this game from history?',
       confirmResetTitle: 'Reset', confirmResetText: 'Are you sure you want to reset?',
       toastSaved: 'Game saved', quitLabel: 'Quit',
-      quitFallback: 'Close the tab or swipe the app away to quit.', langLabel: 'Language'
+      quitFallback: 'Close the tab or swipe the app away to quit.', langLabel: 'Language',
+      quitConfirmTitle: 'Quit', quitConfirmText: 'Are you sure you want to quit the app?'
     },
     es: {
       teamUs: 'Nosotros', teamThem: 'Vosotros', photoHint: 'Contar con IA', totalLabel: 'Total',
@@ -1017,7 +1021,8 @@
       confirmDeleteTitle: 'Eliminar', confirmDeleteText: '¿Eliminar esta partida del historial?',
       confirmResetTitle: 'Reiniciar', confirmResetText: '¿Seguro que quieres reiniciar?',
       toastSaved: 'Partida guardada', quitLabel: 'Salir',
-      quitFallback: 'Cierra la pestaña o desliza la app para salir.', langLabel: 'Idioma'
+      quitFallback: 'Cierra la pestaña o desliza la app para salir.', langLabel: 'Idioma',
+      quitConfirmTitle: 'Salir', quitConfirmText: '¿Seguro que quieres salir de la aplicación?'
     },
     it: {
       teamUs: 'Noi', teamThem: 'Voi', photoHint: 'Conta con IA', totalLabel: 'Totale',
@@ -1038,7 +1043,8 @@
       confirmDeleteTitle: 'Elimina', confirmDeleteText: 'Eliminare questa partita dalla cronologia?',
       confirmResetTitle: 'Ripristina', confirmResetText: 'Sei sicuro di voler ripristinare?',
       toastSaved: 'Partita salvata', quitLabel: 'Esci',
-      quitFallback: "Chiudi la scheda o scorri via l'app per uscire.", langLabel: 'Lingua'
+      quitFallback: "Chiudi la scheda o scorri via l'app per uscire.", langLabel: 'Lingua',
+      quitConfirmTitle: 'Esci', quitConfirmText: "Sei sicuro di voler uscire dall'applicazione?"
     },
     ru: {
       teamUs: 'Мы', teamThem: 'Вы', photoHint: 'Считать с ИИ', totalLabel: 'Итого',
@@ -1059,7 +1065,8 @@
       confirmDeleteTitle: 'Удалить', confirmDeleteText: 'Удалить эту партию из истории?',
       confirmResetTitle: 'Сбросить', confirmResetText: 'Вы уверены, что хотите сбросить?',
       toastSaved: 'Партия сохранена', quitLabel: 'Выйти',
-      quitFallback: 'Закройте вкладку или смахните приложение, чтобы выйти.', langLabel: 'Язык'
+      quitFallback: 'Закройте вкладку или смахните приложение, чтобы выйти.', langLabel: 'Язык',
+      quitConfirmTitle: 'Выйти', quitConfirmText: 'Вы уверены, что хотите выйти из приложения?'
     },
     ar: {
       teamUs: 'نحن', teamThem: 'أنتم', photoHint: 'عدّ بالذكاء الاصطناعي', totalLabel: 'المجموع',
@@ -1080,7 +1087,8 @@
       confirmDeleteTitle: 'حذف', confirmDeleteText: 'هل تريد حذف هذه الجولة من السجل؟',
       confirmResetTitle: 'إعادة التعيين', confirmResetText: 'هل أنت متأكد من رغبتك في إعادة التعيين؟',
       toastSaved: 'تم حفظ الجولة', quitLabel: 'خروج',
-      quitFallback: 'أغلق التبويب أو اسحب التطبيق للخروج.', langLabel: 'اللغة'
+      quitFallback: 'أغلق التبويب أو اسحب التطبيق للخروج.', langLabel: 'اللغة',
+      quitConfirmTitle: 'خروج', quitConfirmText: 'هل أنت متأكد من رغبتك في الخروج من التطبيق؟'
     }
   };
 
@@ -1120,7 +1128,7 @@
         var btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'lang-option' + (code === currentLang ? ' active' : '');
-        btn.innerHTML = '<span>' + LANG_NAMES[code] + '</span><svg class="lang-check icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="margin:0;"><path d="M4 12.5l5 5L20 6.5"/></svg>';
+        btn.innerHTML = '<span><span class="lang-flag" aria-hidden="true">' + LANG_FLAGS[code] + '</span> ' + LANG_NAMES[code] + '</span><svg class="lang-check icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="margin:0;"><path d="M4 12.5l5 5L20 6.5"/></svg>';
         btn.addEventListener('click', function(){
           setLang(code);
           closeModal(document.getElementById('langModalOverlay'));
@@ -1999,10 +2007,12 @@
    * ------------------------------------------------------------------- */
 
   document.getElementById('btnQuit').addEventListener('click', function(){
-    try{ window.close(); }catch(e){}
-    setTimeout(function(){
-      showToast(t('quitFallback'));
-    }, 300);
+    askConfirmation(t('quitConfirmTitle'), t('quitConfirmText'), function(){
+      try{ window.close(); }catch(e){}
+      setTimeout(function(){
+        showToast(t('quitFallback'));
+      }, 300);
+    });
   });
 
   /* ---------------------------------------------------------------------
